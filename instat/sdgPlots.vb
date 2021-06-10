@@ -37,6 +37,7 @@ Public Class sdgPlots
     Public clsYLabFunction As New RFunction
     Public clsScaleColourViridisFunction As New RFunction
     Public clsScaleFillViridisFunction As New RFunction
+    Private clsAnnotateFunction As New RFunction
     Public clsBaseOperator As New ROperator
     Private bControlsInitialised As Boolean = False
     'All the previous RFunctions will eventually be stored as parameters (or parameters of parameters) within the RSyntax building the big Ggplot command "ggplot(...) + geom_..(..) + ... + theme(...) + scales(...) ..."
@@ -77,6 +78,8 @@ Public Class sdgPlots
         Dim dctLegendPosition As New Dictionary(Of String, String)
         Dim dctFillOptions As New Dictionary(Of String, String)
         Dim dctColourOptions As New Dictionary(Of String, String)
+        Dim dctAnnotationGeom As New Dictionary(Of String, String)
+        Dim dctAnnotationFill As New Dictionary(Of String, String)
 
         Dim strThemes As String()
 
@@ -85,6 +88,8 @@ Public Class sdgPlots
 
         Dim clsCoordEqualFunc As New RFunction
         Dim clsCoordEqualParam As New RParameter
+
+
 
         ucrBaseSubdialog.iHelpTopicID = 136
         'facets tab  
@@ -339,6 +344,199 @@ Public Class sdgPlots
         ucrChkDrop.SetText("Drop empty factor levels")
         ucrChkDrop.SetRDefault("TRUE")
 
+        'Annotation
+        grpAnnotation.Visible = False
+
+        ucrChkUseDataframe.SetText("Use Dataframe")
+
+        ucrChkAnnotation.SetText("Annotation")
+        ucrChkAnnotation.AddParameterPresentCondition(True, "annotate", True)
+        ucrChkAnnotation.AddParameterPresentCondition(False, "annotate", False)
+
+        ucrChkUseDataframe.SetText("Use Dataframe")
+        ucrChkUseDataframe.AddParameterIsRFunctionCondition({True}, "x")
+        ucrChkUseDataframe.AddParameterIsRFunctionCondition({False}, "x", False)
+
+        ucrReceiverX.SetParameter(New RParameter("x", 1))
+        ucrReceiverX.SetParameterIsRFunction()
+        ucrReceiverX.Selector = ucrSelectorAnnotation
+
+        ucrReceiverY.SetParameter(New RParameter("y", 2))
+        ucrReceiverY.SetParameterIsRFunction()
+        ucrReceiverY.Selector = ucrSelectorAnnotation
+
+        ucrReceiverYmin.SetParameter(New RParameter("ymin", 15))
+        ucrReceiverYmin.SetParameterIsRFunction()
+        ucrReceiverYmin.Selector = ucrSelectorAnnotation
+
+        ucrReceiverXmin.SetParameter(New RParameter("xmin", 4))
+        ucrReceiverXmin.SetParameterIsRFunction()
+        ucrReceiverXmin.Selector = ucrSelectorAnnotation
+
+        ucrReceiverXmax.SetParameter(New RParameter("xmax", 7))
+        ucrReceiverXmax.SetParameterIsRFunction()
+        ucrReceiverXmax.Selector = ucrSelectorAnnotation
+
+        ucrReceiverYmax.SetParameter(New RParameter("ymax", 8))
+        ucrReceiverYmax.SetParameterIsRFunction()
+        ucrReceiverYmax.Selector = ucrSelectorAnnotation
+
+        ucrInputX.SetParameter(New RParameter("x", 1))
+        ucrInputX.SetLinkedDisplayControl(lblX)
+        ucrInputX.SetRDefault("NULL")
+        ucrInputX.AddQuotesIfUnrecognised = False
+
+        ucrInputY.SetParameter(New RParameter("y", 2))
+        ucrInputY.SetLinkedDisplayControl(lblY)
+        ucrInputY.SetRDefault("NULL")
+        ucrInputY.AddQuotesIfUnrecognised = False
+
+        ucrInputYmin.SetParameter(New RParameter("ymin", 3))
+        ucrInputYmin.SetLinkedDisplayControl(lblYmin)
+        ucrInputYmin.SetRDefault("NULL")
+        ucrInputYmin.AddQuotesIfUnrecognised = False
+
+        ucrInputXmin.SetParameter(New RParameter("xmin", 4))
+        ucrInputXmin.SetLinkedDisplayControl(lblXmin)
+        ucrInputXmin.SetRDefault("NULL")
+        ucrInputXmin.AddQuotesIfUnrecognised = False
+
+        ucrInputXend.SetParameter(New RParameter("xend", 5))
+        ucrInputXend.SetLinkedDisplayControl(lblXend)
+        ucrInputXend.SetRDefault("NULL")
+        ucrInputXend.AddQuotesIfUnrecognised = False
+
+        ucrInputYend.SetParameter(New RParameter("yend", 6))
+        ucrInputYend.SetLinkedDisplayControl(lblYend)
+        ucrInputYend.SetRDefault("NULL")
+        ucrInputYend.AddQuotesIfUnrecognised = False
+
+        ucrInputXmax.SetParameter(New RParameter("xmax", 7))
+        ucrInputXmax.SetLinkedDisplayControl(lblXmax)
+        ucrInputXmax.SetRDefault("NULL")
+        ucrInputXmax.AddQuotesIfUnrecognised = False
+
+        ucrInputRectXmax.SetParameter(New RParameter("xmax", 7))
+        ucrInputRectXmax.SetRDefault("NULL")
+        ucrInputRectXmax.AddQuotesIfUnrecognised = False
+
+        ucrInputRectXmin.SetParameter(New RParameter("xmin", 4))
+        ucrInputRectXmin.SetRDefault("NULL")
+        ucrInputRectXmin.AddQuotesIfUnrecognised = False
+
+        ucrInputRectYmax.SetParameter(New RParameter("ymax", 8))
+        ucrInputRectYmax.SetRDefault("NULL")
+        ucrInputRectYmax.AddQuotesIfUnrecognised = False
+
+        ucrInputRectYmin.SetParameter(New RParameter("ymin", 3))
+        ucrInputRectYmin.SetRDefault("NULL")
+        ucrInputRectYmin.AddQuotesIfUnrecognised = False
+
+        ucrInputYmax.SetParameter(New RParameter("ymax", 8))
+        ucrInputYmax.SetLinkedDisplayControl(lblYmax)
+        ucrInputYmax.SetRDefault("NULL")
+        ucrInputYmax.AddQuotesIfUnrecognised = False
+
+        ucrNudLinetype.SetParameter(New RParameter("linetype", 9))
+        ucrNudLinetype.SetMinMax(iNewMin:=1)
+        ucrNudLinetype.SetRDefault(1)
+        ucrNudLinetype.SetLinkedDisplayControl(lblLinetype)
+
+        ucrNudCurvature.SetParameter(New RParameter("curvature", 10))
+        ucrNudCurvature.DecimalPlaces = 1
+        ucrNudCurvature.SetRDefault(0.5)
+        ucrNudCurvature.SetLinkedDisplayControl(lblCurvature)
+
+        ucrNudCrossbarFatten.SetParameter(New RParameter("fatten", 10))
+        ucrNudCrossbarFatten.SetMinMax(iNewMin:=0)
+        ucrNudCrossbarFatten.SetRDefault(2.5)
+        ucrNudCrossbarFatten.SetLinkedDisplayControl(lblCrossbarFatten)
+
+        ucrNudPointrangeFatten.SetParameter(New RParameter("fatten", 11))
+        ucrNudPointrangeFatten.SetMinMax(iNewMin:=0)
+        ucrNudPointrangeFatten.SetRDefault(4)
+        ucrNudPointrangeFatten.SetLinkedDisplayControl(lblPointrangeFatten)
+
+        ucrInputLineend.SetParameter(New RParameter("lineend", 12))
+        ucrInputLineend.SetItems({"butt", "square", "round"}, bAddConditions:=True)
+        ucrInputLineend.SetRDefault(Chr(34) & "butt" & Chr(34))
+        ucrInputLineend.SetLinkedDisplayControl(lblLineend)
+
+        ucrNudAngle.SetParameter(New RParameter("angle", 13))
+        ucrNudAngle.SetMinMax(0, 180)
+        ucrNudAngle.Increment = 1
+        ucrNudAngle.SetRDefault(90)
+        ucrNudAngle.SetLinkedDisplayControl(lblAngle)
+
+        ucrNudShape.SetParameter(New RParameter("shape", 14))
+        ucrNudShape.SetMinMax(1, 255)
+        ucrNudShape.Increment = 1
+        ucrNudShape.SetRDefault(1)
+        ucrNudShape.SetLinkedDisplayControl(lblShape)
+
+        ucrInputAnnotationGeoms.SetParameter(New RParameter("geom", iNewPosition:=15))
+        dctAnnotationGeom.Add("text", Chr(34) & "text" & Chr(34))
+        dctAnnotationGeom.Add("rect", Chr(34) & "rect" & Chr(34))
+        dctAnnotationGeom.Add("segment", Chr(34) & "segment" & Chr(34))
+        dctAnnotationGeom.Add("pointrange", Chr(34) & "pointrange" & Chr(34))
+        dctAnnotationGeom.Add("label", Chr(34) & "label" & Chr(34))
+        dctAnnotationGeom.Add("curve", Chr(34) & "curve" & Chr(34))
+        dctAnnotationGeom.Add("linerange", Chr(34) & "linerange" & Chr(34))
+        dctAnnotationGeom.Add("errorbar", Chr(34) & "errorbar" & Chr(34))
+        dctAnnotationGeom.Add("crossbar", Chr(34) & "crossbar" & Chr(34))
+        ucrInputAnnotationGeoms.SetItems(dctAnnotationGeom)
+        ucrInputAnnotationGeoms.SetLinkedDisplayControl(lblAnnotationGeoms)
+
+        dctAnnotationFill.Add("Black", Chr(34) & "black" & Chr(34))
+        dctAnnotationFill.Add("Red", Chr(34) & "red" & Chr(34))
+        dctAnnotationFill.Add("Blue", Chr(34) & "blue" & Chr(34))
+        dctAnnotationFill.Add("Yellow", Chr(34) & "yellow" & Chr(34))
+        dctAnnotationFill.Add("Green", Chr(34) & "green" & Chr(34))
+        dctAnnotationFill.Add("Violet", Chr(34) & "violet" & Chr(34))
+        dctAnnotationFill.Add("White", Chr(34) & "white" & Chr(34))
+
+        ucrInputFill.SetParameter(New RParameter("fill", 16))
+        ucrInputFill.SetItems(dctAnnotationFill)
+        ucrInputFill.SetRDefault(Chr(34) & "black" & Chr(34))
+        ucrInputFill.SetLinkedDisplayControl(lblFill)
+
+        ucrInputColour.SetParameter(New RParameter("colour", 17))
+        ucrInputColour.SetItems(dctAnnotationFill)
+        ucrInputColour.SetLinkedDisplayControl(lblColour)
+        ucrInputColour.SetRDefault(Chr(34) & "black" & Chr(34))
+
+        ucrNudAlpha.SetParameter(New RParameter("alpha", iNewPosition:=18))
+        ucrNudAlpha.SetMinMax(0, 1)
+        ucrNudAlpha.Increment = 0.01
+        ucrNudAlpha.DecimalPlaces = 2
+        ucrNudAlpha.SetLinkedDisplayControl(lblAlpha)
+        ucrNudAlpha.SetRDefault(1.0)
+
+        ucrNudSize.SetParameter(New RParameter("size", 19))
+        ucrNudSize.SetMinMax(iNewMin:=0)
+        ucrNudSize.Increment = 0.1
+        ucrNudSize.DecimalPlaces = 1
+        ucrNudSize.SetLinkedDisplayControl(lblSize)
+
+        ucrInputLabel.SetParameter(New RParameter("label", 20))
+        ucrInputLabel.SetLinkedDisplayControl(lblLabel)
+        ucrInputLabel.SetRDefault("")
+
+        ucrInputAnnotationGeoms.AddToLinkedControls(ucrInputFill, {"rect", "label"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls({ucrInputY, ucrInputX}, {"text", "curve", "segment", "label", "linerange", "errorbar", "crossbar", "pointrange"}, bNewLinkedDisabledIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls({ucrInputYend, ucrInputXend}, {"segment", "curve", "text", "label"}, bNewLinkedDisabledIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls({ucrInputYmax, ucrInputXmax, ucrInputXmin, ucrInputYmin}, {"text", "linerange", "errorbar", "crossbar", "pointrange"}, bNewLinkedDisabledIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls(ucrNudLinetype, {"segment", "curve", "linerange", "errorbar", "crossbar", "pointrange"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls({ucrNudCurvature, ucrNudAngle}, {"curve"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls(ucrInputLineend, {"segment"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls(ucrNudCrossbarFatten, {"crossbar"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls({ucrNudShape, ucrNudPointrangeFatten}, {"pointrange"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls(ucrInputLabel, {"text", "label"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedAddRemoveParameter:=True)
+        ucrInputAnnotationGeoms.AddToLinkedControls(ucrChkUseDataframe, {"rect"}, bNewLinkedHideIfParameterMissing:=True)
+        ucrChkUseDataframe.AddToLinkedControls({ucrInputRectYmin, ucrInputRectYmax, ucrInputRectXmin, ucrInputRectXmax}, {False}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
+        ucrChkUseDataframe.AddToLinkedControls({ucrReceiverXmax, ucrReceiverXmin, ucrReceiverYmax, ucrReceiverYmin}, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
+        ucrChkUseDataframe.AddToLinkedControls(ucrSelectorAnnotation, {True}, bNewLinkedHideIfParameterMissing:=True)
+
         'Colour
         ucrInputFillScaleColour.SetParameter(New RParameter("option", iNewPosition:=0))
         dctFillOptions.Add("viridis", Chr(34) & "viridis" & Chr(34))
@@ -434,8 +632,11 @@ Public Class sdgPlots
         grpColourScale.Visible = False
     End Sub
 
-    Public Sub SetRCode(clsNewOperator As ROperator, clsNewCoordPolarFunction As RFunction, clsNewCoordPolarStartOperator As ROperator, clsNewYScalecontinuousFunction As RFunction, clsNewXScalecontinuousFunction As RFunction, clsNewLabsFunction As RFunction, clsNewXLabsTitleFunction As RFunction, clsNewYLabTitleFunction As RFunction, clsNewFacetFunction As RFunction, clsNewThemeFunction As RFunction, dctNewThemeFunctions As Dictionary(Of String, RFunction), ucrNewBaseSelector As ucrSelector, bReset As Boolean, Optional clsNewGlobalAesFunction As RFunction = Nothing, Optional clsNewXScaleDateFunction As RFunction = Nothing, Optional clsNewYScaleDateFunction As RFunction = Nothing,
-                        Optional clsNewScaleFillViridisFunction As RFunction = Nothing, Optional clsNewScaleColourViridisFunction As RFunction = Nothing, Optional strMainDialogGeomParameterNames() As String = Nothing, Optional bNewEnableFill As Boolean = True, Optional bNewEnableColour As Boolean = True, Optional bNewEnableDiscrete As Boolean = True)
+    Public Sub SetRCode(clsNewOperator As ROperator, clsNewCoordPolarFunction As RFunction, clsNewCoordPolarStartOperator As ROperator, clsNewYScalecontinuousFunction As RFunction, clsNewXScalecontinuousFunction As RFunction, clsNewLabsFunction As RFunction,
+                        clsNewXLabsTitleFunction As RFunction, clsNewYLabTitleFunction As RFunction, clsNewFacetFunction As RFunction, clsNewThemeFunction As RFunction, dctNewThemeFunctions As Dictionary(Of String, RFunction), ucrNewBaseSelector As ucrSelector,
+                        bReset As Boolean, Optional clsNewGlobalAesFunction As RFunction = Nothing, Optional clsNewXScaleDateFunction As RFunction = Nothing, Optional clsNewYScaleDateFunction As RFunction = Nothing,
+                        Optional clsNewScaleFillViridisFunction As RFunction = Nothing, Optional clsNewScaleColourViridisFunction As RFunction = Nothing, Optional strMainDialogGeomParameterNames() As String = Nothing, Optional clsNewAnnotateFunction As RFunction = Nothing,
+                        Optional bNewEnableFill As Boolean = True, Optional bNewEnableColour As Boolean = True, Optional bNewEnableDiscrete As Boolean = True)
         Dim clsTempParam As RParameter
         bRCodeSet = False
 
@@ -445,9 +646,11 @@ Public Class sdgPlots
         ucrBaseSelector = ucrNewBaseSelector
         If ucrBaseSelector IsNot Nothing AndAlso ucrBaseSelector.strCurrentDataFrame <> "" Then
             strDataFrame = ucrBaseSelector.strCurrentDataFrame
+            ucrSelectorAnnotation.SetDataframe(strDataFrame, False)
             ucrFacetSelector.SetDataframe(strDataFrame, False)
         End If
 
+        ucrSelectorAnnotation.SetLinkedSelector(ucrBaseSelector)
         ucrFacetSelector.SetLinkedSelector(ucrBaseSelector)
         clsYScaleDateFunction = clsNewYScaleDateFunction
         clsXScaleDateFunction = clsNewXScaleDateFunction
@@ -463,6 +666,8 @@ Public Class sdgPlots
         clsCoordPolarStartOperator = clsNewCoordPolarStartOperator
         clsScaleFillViridisFunction = clsNewScaleFillViridisFunction
         clsScaleColourViridisFunction = clsNewScaleColourViridisFunction
+        clsAnnotateFunction = clsNewAnnotateFunction
+
 
         If Not IsNothing(clsCoordPolarStartOperator) Then
             clsCoordPolarFunc.AddParameter("start", clsROperatorParameter:=clsCoordPolarStartOperator, iPosition:=1)
@@ -516,6 +721,39 @@ Public Class sdgPlots
         ucrChkDrop.SetRCode(clsFacetFunction, bReset, bCloneIfNeeded:=True)
         ucrChkIncludeFacets.SetRCode(clsBaseOperator, bReset, bCloneIfNeeded:=True)
 
+        'Annnotation
+        ucrChkAnnotation.SetRCode(clsBaseOperator, bReset, bCloneIfNeeded:=True)
+        ucrInputX.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputY.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputXmax.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputYmax.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputYmin.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputXmin.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputXend.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputYend.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudAlpha.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudSize.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudLinetype.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudAngle.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudCurvature.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudCrossbarFatten.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudPointrangeFatten.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputLineend.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputLabel.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrNudShape.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputFill.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputColour.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrReceiverY.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrReceiverX.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrReceiverXmin.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrReceiverXmax.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrReceiverYmax.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrReceiverYmin.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputRectXmax.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputRectXmin.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputRectYmax.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputRectYmin.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
+        ucrInputAnnotationGeoms.SetRCode(clsAnnotateFunction, bReset, bCloneIfNeeded:=True)
         'axis controls
         ucrXAxis.SetRCodeForControl(bIsXAxis:=True, strNewAxisType:=GetAxisType(True), clsNewXYlabTitleFunction:=clsXLabFunction, clsNewXYScaleContinuousFunction:=clsXScalecontinuousFunction, clsNewXYScaleDateFunction:=clsXScaleDateFunction, clsNewBaseOperator:=clsBaseOperator, bReset:=bReset, bCloneIfNeeded:=True)
         ucrYAxis.SetRCodeForControl(bIsXAxis:=False, strNewAxisType:=GetAxisType(False), clsNewXYlabTitleFunction:=clsYLabFunction, clsNewXYScaleContinuousFunction:=clsYScalecontinuousFunction, clsNewBaseOperator:=clsBaseOperator, clsNewXYScaleDateFunction:=clsYScaleDateFunction, bReset:=bReset, bCloneIfNeeded:=True)
@@ -769,7 +1007,7 @@ Public Class sdgPlots
         AddRemoveLabs()
     End Sub
 
-    Private Sub ucrChkNoOfRowsOrColumns_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkNoOfRowsOrColumns.ControlValueChanged
+    Private Sub ucrChkNoOfRowsOrColumns_ControlValueChanged(ucrChangedControl As ucrCore)
         SetFacetParameters()
     End Sub
 
@@ -795,7 +1033,7 @@ Public Class sdgPlots
         End If
     End Function
 
-    Private Sub cmdAllOptions_Click(sender As Object, e As EventArgs) Handles cmdAllOptions.Click
+    Private Sub cmdAllOptions_Click(sender As Object, e As EventArgs)
         sdgThemes.SetRCode(clsBaseOperator, clsNewThemeFunction:=clsThemeFunction, dctNewThemeFunctions:=dctThemeFunctions, bReset:=bResetThemes)
         Me.SendToBack()
         sdgThemes.ShowDialog()
@@ -857,23 +1095,23 @@ Public Class sdgPlots
         End If
     End Sub
 
-    Private Sub ElementXAxisTextControls_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkXaxisAngle.ControlValueChanged, ucrNudXAngle.ControlValueChanged, ucrChkXaxisTickMarkLabelSize.ControlValueChanged, ucrNudXaxisMarkSize.ControlValueChanged
+    Private Sub ElementXAxisTextControls_ControlValueChanged(ucrChangedControl As ucrCore)
         AddRemoveXElementAxisText()
     End Sub
 
-    Private Sub ucrChkXaxisSize_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkXaxisSize.ControlValueChanged, ucrNudXSize.ControlValueChanged
+    Private Sub ucrChkXaxisSize_ControlValueChanged(ucrChangedControl As ucrCore)
         AddRemoveXElementTitle()
     End Sub
 
-    Private Sub ucrChkYaxisTickMarkLabelSize_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkYaxisTickMarkLabelSize.ControlValueChanged, ucrNudYaxisMarkSize.ControlValueChanged
+    Private Sub ucrChkYaxisTickMarkLabelSize_ControlValueChanged(ucrChangedControl As ucrCore)
         AddRemoveYElementAxisText()
     End Sub
 
-    Private Sub ucrChkYaxisSize_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkYaxisSize.ControlValueChanged, ucrNudYSize.ControlValueChanged
+    Private Sub ucrChkYaxisSize_ControlValueChanged(ucrChangedControl As ucrCore)
         AddRemoveYElementAxisTitle()
     End Sub
 
-    Private Sub ucrChkLegendPosition_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkLegendPosition.ControlValueChanged
+    Private Sub ucrChkLegendPosition_ControlValueChanged(ucrChangedControl As ucrCore)
         AddRemoveTheme()
     End Sub
 
@@ -897,14 +1135,14 @@ Public Class sdgPlots
         ucrChkXaxisTickMarkLabelSize.SetRCode(clsXElementText, bReset, bCloneIfNeeded:=True)
     End Sub
 
-    Private Sub cmdSimpleOptions_Click(sender As Object, e As EventArgs) Handles cmdSimpleOptions.Click
+    Private Sub cmdSimpleOptions_Click(sender As Object, e As EventArgs)
         sdgThemesSub.SetRCode(clsBaseOperator, clsNewThemesFunction:=clsThemeFunction, dctNewThemeFunctions:=dctThemeFunctions, bReset:=bResetThemes)
         Me.SendToBack()
         sdgThemesSub.ShowDialog()
         SetRcodeForCommonThemesControls(False)
     End Sub
 
-    Private Sub ucrChkUsePolarCoordinates_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkUsePolarCoordinates.ControlValueChanged
+    Private Sub ucrChkUsePolarCoordinates_ControlValueChanged(ucrChangedControl As ucrCore)
         If ucrChkUsePolarCoordinates.Checked Then
             clsBaseOperator.AddParameter("coord_polar", clsRFunctionParameter:=clsCoordPolarFunc, iPosition:=20)
         Else
@@ -912,7 +1150,7 @@ Public Class sdgPlots
         End If
     End Sub
 
-    Private Sub ucrChkAddFillScale_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkAddFillScale.ControlValueChanged
+    Private Sub ucrChkAddFillScale_ControlValueChanged(ucrChangedControl As ucrCore)
         If ucrChkAddFillScale.Checked Then
             clsBaseOperator.AddParameter("scale_fill", clsRFunctionParameter:=clsScaleFillViridisFunction, iPosition:=3)
             grpFillScale.Visible = True
@@ -922,13 +1160,23 @@ Public Class sdgPlots
         End If
     End Sub
 
-    Private Sub ucrChkAddColour_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkAddColour.ControlValueChanged
+    Private Sub ucrChkAddColour_ControlValueChanged(ucrChangedControl As ucrCore)
         If ucrChkAddColour.Checked Then
             clsBaseOperator.AddParameter("scale_colour", clsRFunctionParameter:=clsScaleColourViridisFunction, iPosition:=8)
             grpColourScale.Visible = True
         Else
             clsBaseOperator.RemoveParameterByName("scale_colour")
             grpColourScale.Visible = False
+        End If
+    End Sub
+
+    Private Sub ucrChkAnnotation_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkAnnotation.ControlValueChanged
+        If ucrChkAnnotation.Checked Then
+            clsBaseOperator.AddParameter("annotate", clsRFunctionParameter:=clsAnnotateFunction, iPosition:=10)
+            grpAnnotation.Visible = True
+        Else
+            clsBaseOperator.RemoveParameterByName("annotate")
+            grpAnnotation.Visible = False
         End If
     End Sub
 End Class
